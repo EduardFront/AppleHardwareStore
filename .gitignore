@@ -1,0 +1,6 @@
+.idea/*
+.vs/*
+
+AppleHardwareStore/bin
+AppleHardwareStore/obj
+AppleHardwareStore/appsettings.Development.json
