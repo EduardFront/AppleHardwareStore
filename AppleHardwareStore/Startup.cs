@@ -13,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace AppleHardwareStore
 {
-    public class Startup
+    public class  Startup
     {
         public Startup(IConfiguration configuration)
         {
@@ -28,6 +28,7 @@ namespace AppleHardwareStore
             services.AddControllersWithViews();
             services.AddDbContext<AppleHardwareStoreDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            var serv = services.ToList();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
