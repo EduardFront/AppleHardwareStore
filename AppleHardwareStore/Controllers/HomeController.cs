@@ -7,6 +7,7 @@ using AppleHardwareStore.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AppleHardwareStore.Models;
+using AppleHardwareStore.Services;
 
 namespace AppleHardwareStore.Controllers
 {
@@ -14,14 +15,17 @@ namespace AppleHardwareStore.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppleHardwareStoreDbContext _dbContext;
-        public HomeController(ILogger<HomeController> logger, AppleHardwareStoreDbContext dbContext)
+        private readonly IMessageSender _messageSender;
+        public HomeController(ILogger<HomeController> logger, AppleHardwareStoreDbContext dbContext, IMessageSender messageSender)
         {
             _logger = logger;
             _dbContext = dbContext;
+            _messageSender = messageSender;
         }
 
         public IActionResult Index()
-        {   
+        {
+            ViewBag.Message = _messageSender.Send("Не в ротик");
             return View(_dbContext.ProductTypes.ToList());
         }
 
