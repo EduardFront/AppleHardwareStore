@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
-namespace FurnitureFactory
+namespace AppleHardwareStore
 {
     public static class FileHelper
     {

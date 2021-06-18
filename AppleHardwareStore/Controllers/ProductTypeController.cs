@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using AppleHardwareStore.Data;
-using AppleHardwareStore.Interfaces;
 using AppleHardwareStore.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +15,11 @@ namespace AppleHardwareStore.Controllers
     public class ProductTypeController : ControllerBase
     {
         private readonly AppleHardwareStoreDbContext _context;
-        private readonly IAsyncRepository<ProductType> _repository;
         private readonly IMapper _mapper;
 
-        public ProductTypeController(AppleHardwareStoreDbContext context, IAsyncRepository<ProductType> repository, IMapper mapper)
+        public ProductTypeController(AppleHardwareStoreDbContext context)
         {
-            _repository = repository;
             _context = context;
-            _mapper = mapper;
         }
 
         // GET: api/Test

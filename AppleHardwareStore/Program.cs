@@ -11,27 +11,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace FurnitureFactory
+namespace AppleHardwareStore
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).Build();
+            CreateHostBuilder(args).Build().Run();
 
-            var serviceScope = host.Services.CreateScope();
-            var services = serviceScope.ServiceProvider;
-
-            FileHelper.Initialize(services.GetService<IWebHostEnvironment>());
-
-
-            var rolesManager = services.GetRequiredService<RoleManager<IdentityRole<int>>>();
-            //await RoleInitializer.InitializeRoleAsync(rolesManager);
-
-            var userManager = services.GetRequiredService<UserManager<User>>();
-            //await UserInitializer.InitializeUserAsync(userManager);
-
-            await host.RunAsync();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

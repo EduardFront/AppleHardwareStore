@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AppleHardwareStore.Data;
 using AppleHardwareStore.DTO;
-using FurnitureFactory.Initializers;
 using AppleHardwareStore.Models;
 using AppleHardwareStore.Models.Input;
 using Microsoft.AspNetCore.Identity;
@@ -45,7 +44,7 @@ namespace AppleHardwareStore.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, Rolse.User);
+                    await _userManager.AddToRoleAsync(user, "User");
                     var token = await Token(model);
                     return token;
                 }

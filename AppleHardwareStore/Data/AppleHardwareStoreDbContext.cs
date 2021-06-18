@@ -1,23 +1,24 @@
 ﻿using System.Linq;
 using AppleHardwareStore.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace AppleHardwareStore.Data
 {
-    public class AppleHardwareStoreDbContext : DbContext
+    public class AppleHardwareStoreDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<OrderStatus> OrderStatus { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Position> Positions { get; set; }
-        public DbSet<User> Users { get; set; }
 
 
         public AppleHardwareStoreDbContext(DbContextOptions<AppleHardwareStoreDbContext> options) : base(options)
         {
-            /*Database.EnsureCreated();
+            Database.EnsureCreated();
             if (!ProductTypes.Any())
             {
                 ProductTypes.Add(new ProductType
@@ -37,37 +38,34 @@ namespace AppleHardwareStore.Data
                     Name = "IPhone6",
                     ProductTypeId = ProductTypes.FirstOrDefault(x => x.Name == "Phone").Id,
                     Price = 20000,
-                    Description = "128gb, Processor A9, Color SpaceGray, Camera 9mp"
+                    Description = "128gb, Processor A9, Color SpaceGray, Camera 9mp",
                 });
                 Products.Add(new Product
                 {
                     Name = "IPhoneXR",
                     ProductTypeId = ProductTypes.FirstOrDefault(x => x.Name == "Phone").Id,
                     Price = 65000,
-                    Description = "250gb, Processor A13, Color White, Camera 15mp"
+                    Description = "250gb, Processor A13, Color White, Camera 15mp",
                 });
                 Products.Add(new Product
                 {
                     Name = "MacBook Pro",
                     ProductTypeId = ProductTypes.FirstOrDefault(x => x.Name == "Laptop").Id,
                     Price = 65000,
-                    Description = "SSD - 250gb, RAM - 8gb, Processor - M9, Color - SpaceGray, GPU - AMD Radeon"
+                    Description = "SSD - 250gb, RAM - 8gb, Processor - M9, Color - SpaceGray, GPU - AMD Radeon",
                 });
                 SaveChanges();
-            }*/
+            }
         }
 
         /// <summary>
         /// Database models schema
         /// </summary>
         /// <param name="modelBuilder"></param>
-#pragma warning disable CA1041 // Укажите сообщение ObsoleteAttribute
-        [System.Obsolete]
-#pragma warning restore CA1041 // Укажите сообщение ObsoleteAttribute
-#pragma warning disable CS0809 // Устаревший член переопределяет неустаревший член
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-#pragma warning restore CS0809 // Устаревший член переопределяет неустаревший член
         {
+            base.OnModelCreating(modelBuilder);
+ 
             modelBuilder.Entity<Models.ProductType>(entity =>
             {
                 entity.ToTable("product_type");
@@ -108,24 +106,7 @@ namespace AppleHardwareStore.Data
                     .WithMany(pt => pt.Products)
                     .HasForeignKey(e => e.ProductTypeId);
             });
-            modelBuilder.Entity<Models.User>(entity =>
-            {
-                entity.ToTable(name: "users");
-                entity.Property(e => e.Id)
-                    .HasColumnType("int")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("id");
-
-                entity.Property(e => e.Name)
-                    .HasColumnName("name")
-                    .HasMaxLength(225);
-
-                entity.Property(e => e.ClientAddress).HasColumnName("client_address");
-                entity.Property(e => e.ClientPhone).HasColumnName("client_phone");
-                entity.Property(e => e.ClientCardNumber).HasColumnName("client_card_number");
-
-            });
-
+           
                 modelBuilder.Entity<Models.OrderStatus>(entity =>
             {
                 entity.ToTable(name: "order_status");

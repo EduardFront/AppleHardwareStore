@@ -5,10 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AppleHardwareStore.Interfaces;
-using AppleHardwareStore.Repositories;
-using AutoMapper.EquivalencyExpression;
-using AppleHardwareStore.Initializers;
 using AppleHardwareStore.Data;
 using AppleHardwareStore.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,28 +40,26 @@ namespace AppleHardwareStore
             services.AddControllers().AddNewtonsoftJson(options =>
              options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+            //services.AddControllersWithViews();
+
+            services.AddRazorPages();
+
             services.AddDbContext<AppleHardwareStoreDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             //Add custom Identity
-            services.AddIdentity<User, IdentityRole<int>>(opts =>
-            {
-                #region Настройки валидации пароля
-                opts.Password.RequiredLength = 1; // минимальная длина
-                opts.Password.RequireNonAlphanumeric = false; // требуются ли не алфавитно-цифровые символы
-                opts.Password.RequireLowercase = false; // требуются ли символы в нижнем регистре
-                opts.Password.RequireUppercase = false; // требуются ли символы в верхнем регистре
-                opts.Password.RequireDigit = false; // требуются ли цифры
-                #endregion
-            }); 
+            services.AddIdentity<User, IdentityRole<int>>(options =>
+                    options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<AppleHardwareStoreDbContext>()
+                .AddRoles<IdentityRole<int>>();
 
             //.AddEntityFrameworkStores<AppleHardwareStoreDbContext>();
 
             //Add api documentation
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "FurnitureFactory API", Version = "v1" });
-                c.DescribeAllParametersInCamelCase();
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "AppleHardwareStore API", Version = "v1" });
+                c.DescribeAllParametersInCamelCase(); 
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -73,7 +67,7 @@ namespace AppleHardwareStore
                 {
                     Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n 
                       Enter 'Bearer' [space] and then your token in the text input below.
-                      \r\n\r\nExample: 'Bearer 12345abcdef'",
+                      \r\n\r\nExample: 'Bearer sndnds555'",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
@@ -90,7 +84,7 @@ namespace AppleHardwareStore
                                 Type = ReferenceType.SecurityScheme,
                                 Id = "Bearer"
                             },
-                            Scheme = "oauth2",
+                            Scheme = "scheme",
                             Name = "Bearer",
                             In = ParameterLocation.Header,
                         },
@@ -118,14 +112,6 @@ namespace AppleHardwareStore
                         ValidateIssuerSigningKey = true,
                     };
                 });
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
-
-
-            services.AddAutoMapper(e =>
-            {
-                e.AddProfile<AutoMapperProfile>();
-                e.AddCollectionMappers();
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -145,14 +131,14 @@ namespace AppleHardwareStore
             app.UseHttpsRedirection();
             app.UseDirectoryBrowser(new DirectoryBrowserOptions()
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(env.WebRootPath, "upload", "product")),
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.WebRootPath, "product")),
 
-                RequestPath = "/img"
+                RequestPath = "/Image"
             });
             app.UseStaticFiles(new StaticFileOptions
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(env.WebRootPath, "upload", "product")),
-                RequestPath = "/img"
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.WebRootPath,"product")),
+                RequestPath = "/Image"
             });
 
             app.UseRouting();
@@ -165,9 +151,19 @@ namespace AppleHardwareStore
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+            });
+
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "TestVS1"); });
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Nevrotik");
+                c.RoutePrefix = "swagger";
+            });
+
             app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseEndpoints(endpoints =>
             {

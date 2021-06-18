@@ -10,10 +10,7 @@ using AppleHardwareStore.Models;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using AppleHardwareStore.Interfaces;
-using AutoMapper;
-using FurnitureFactory.Initializers;
-using FurnitureFactory;
+using AppleHardwareStore;
 using AppleHardwareStore.DTO.Product;
 
 namespace AppleHardwareStore.Controllers
@@ -24,15 +21,10 @@ namespace AppleHardwareStore.Controllers
     public class ProductController : ControllerBase
     {
         private readonly AppleHardwareStoreDbContext _context;
-        private readonly IAsyncRepository<Product> _repository;
-        private readonly IMapper _mapper;
 
-        public ProductController(AppleHardwareStoreDbContext context, IAsyncRepository<Product> repository,
-            IMapper mapper)
+        public ProductController(AppleHardwareStoreDbContext context)
         {
-            _repository = repository;
             _context = context;
-           _mapper = mapper;
         }
 
         
@@ -118,11 +110,10 @@ namespace AppleHardwareStore.Controllers
         public ActionResult<List<Product>> GetList() => _context.Products.ToList();
 
         [HttpPost("")]
-        [Authorize(Roles = Rolse.Admin)]
         public async Task<ActionResult> Post([FromForm] CreateProductDTO createProductDTO)
         {
             var fileName = createProductDTO.Image.GetHashFileName();
-            await FileHelper.CreateFile(new[] { "upload", "module" }, fileName, createProductDTO.Image);
+            await FileHelper.CreateFile(new[] { "Product" }, fileName, createProductDTO.Image);
 
             var product = new Product
             {
@@ -134,7 +125,8 @@ namespace AppleHardwareStore.Controllers
 
             try
             {
-                await _repository.AddAsync(product);
+                _context.Add(product);
+                _context.SaveChanges();
             }
             catch (Exception e)
             {
@@ -146,10 +138,9 @@ namespace AppleHardwareStore.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = Rolse.Admin)]
         public async Task<ActionResult> Put([FromForm] EditProductDTO editProductDTO, int id)
         {
-            var product = await _repository.GetByIdAsync(id);
+            var product = _context.Products.FirstOrDefault(x => x.Id == id);
             if (product is null)
             {
                 return BadRequest();
@@ -159,32 +150,32 @@ namespace AppleHardwareStore.Controllers
             {
                 var fileName = editProductDTO.Image.GetHashFileName();
                 if (product.Image is not null)
-                    await FileHelper.DeleteFile(new[] { "upload", "product" }, product.Image);
-                await FileHelper.CreateFile(new[] { "upload", "product" }, fileName, editProductDTO.Image);
+                    await FileHelper.DeleteFile(new[] {"Product" }, product.Image);
+                await FileHelper.CreateFile(new[] {"Product" }, fileName, editProductDTO.Image);
                 product.Image = fileName;
             }
 
             product.Name = editProductDTO.Name;
             product.Price = editProductDTO.Price;
             product.Description = editProductDTO.Description;
-            await _repository.UpdateAsync(product);
+            _context.Products.Update(product);
+            await _context.SaveChangesAsync();
             return Ok();
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ProductDto>> Get(int id)
         {
-            var module = await _repository.GetByIdAsync(id);
-            if (module is null)
+            var product = _context.Products.FirstOrDefault(x => x.Id == id);
+            if (product is null)
             {
                 return NotFound();
             }
 
-            module.Image = $"{Request.Scheme}://{Request.Host}/img/{module.Image}";
-            return Ok(module);
+            product.Image = $"{Request.Scheme}://{Request.Host}/Image/{product.Image}";
+            return Ok(product);
         }
 
-        [Authorize(Roles = Rolse.Admin)]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete([FromRoute] int id)
         {
@@ -193,7 +184,7 @@ namespace AppleHardwareStore.Controllers
             {
                 return BadRequest();
             }
-            await FileHelper.DeleteFile(new[] { "upload", "product" }, product.Image);
+            await FileHelper.DeleteFile(new[] { "Product" }, product.Image);
 
 
             _context.Products.Remove(product);

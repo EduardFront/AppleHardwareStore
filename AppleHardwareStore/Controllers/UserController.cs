@@ -9,9 +9,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FurnitureFactory.Initializers;
 
-namespace FurnitureFactory.Controllers
+namespace AppleHardwareStore.Controllers
 {
     [Route("api/users")]
     [ApiController]
@@ -46,7 +45,7 @@ namespace FurnitureFactory.Controllers
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user is null) return NotFound();
-            if (_userManager.GetRolesAsync(user).GetAwaiter().GetResult().Contains(Rolse.Admin)) return BadRequest("Нельзя удалить админа");
+            if (_userManager.GetRolesAsync(user).GetAwaiter().GetResult().Contains("Admin")) return BadRequest("Нельзя удалить админа");
             var result = await _userManager.DeleteAsync(user);
             if (result.Succeeded)
             {
