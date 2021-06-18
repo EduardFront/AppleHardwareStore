@@ -25,8 +25,8 @@ namespace AppleHardwareStore.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.Message = _messageSender.Send("Не в ротик");
-            return View(_dbContext.ProductTypes.ToList());
+            ViewBag.Message = _messageSender.Send("Сообщение");
+            return View(_dbContext.ProductTypes.OrderBy(item => item.Name).ToList());
         }
 
         public IActionResult Privacy()

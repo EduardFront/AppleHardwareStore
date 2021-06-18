@@ -12,11 +12,12 @@ namespace AppleHardwareStore.Data
         public DbSet<OrderStatus> OrderStatus { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Position> Positions { get; set; }
+        public DbSet<User> Users { get; set; }
 
 
         public AppleHardwareStoreDbContext(DbContextOptions<AppleHardwareStoreDbContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            /*Database.EnsureCreated();
             if (!ProductTypes.Any())
             {
                 ProductTypes.Add(new ProductType
@@ -53,14 +54,19 @@ namespace AppleHardwareStore.Data
                     Description = "SSD - 250gb, RAM - 8gb, Processor - M9, Color - SpaceGray, GPU - AMD Radeon"
                 });
                 SaveChanges();
-            }
+            }*/
         }
 
         /// <summary>
         /// Database models schema
         /// </summary>
         /// <param name="modelBuilder"></param>
+#pragma warning disable CA1041 // Укажите сообщение ObsoleteAttribute
+        [System.Obsolete]
+#pragma warning restore CA1041 // Укажите сообщение ObsoleteAttribute
+#pragma warning disable CS0809 // Устаревший член переопределяет неустаревший член
         protected override void OnModelCreating(ModelBuilder modelBuilder)
+#pragma warning restore CS0809 // Устаревший член переопределяет неустаревший член
         {
             modelBuilder.Entity<Models.ProductType>(entity =>
             {
@@ -102,8 +108,25 @@ namespace AppleHardwareStore.Data
                     .WithMany(pt => pt.Products)
                     .HasForeignKey(e => e.ProductTypeId);
             });
+            modelBuilder.Entity<Models.User>(entity =>
+            {
+                entity.ToTable(name: "users");
+                entity.Property(e => e.Id)
+                    .HasColumnType("int")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
 
-            modelBuilder.Entity<Models.OrderStatus>(entity =>
+                entity.Property(e => e.Name)
+                    .HasColumnName("name")
+                    .HasMaxLength(225);
+
+                entity.Property(e => e.ClientAddress).HasColumnName("client_address");
+                entity.Property(e => e.ClientPhone).HasColumnName("client_phone");
+                entity.Property(e => e.ClientCardNumber).HasColumnName("client_card_number");
+
+            });
+
+                modelBuilder.Entity<Models.OrderStatus>(entity =>
             {
                 entity.ToTable(name: "order_status");
                 entity.Property(e => e.Id)
@@ -128,11 +151,10 @@ namespace AppleHardwareStore.Data
 
                 entity.HasKey(e => e.Id).HasName("order_pk");
 
-
-                entity.Property(e => e.ClientName).HasColumnName("client_name");
-                entity.Property(e => e.ClientAddress).HasColumnName("client_address");
-                entity.Property(e => e.ClientPhone).HasColumnName("client_phone");
-                entity.Property(e => e.ClientCardNumber).HasColumnName("client_card_number");
+                entity.Property(e => e.ClientId).HasColumnName("client_Id");
+                //entity.Property(e => e.ClientAddress).HasColumnName("client_address");
+                //entity.Property(e => e.ClientPhone).HasColumnName("client_phone");
+                //entity.Property(e => e.ClientCardNumber).HasColumnName("client_card_number");
 
                 entity.Property(e => e.TotalCost)
                     .HasColumnName("total_cost");
